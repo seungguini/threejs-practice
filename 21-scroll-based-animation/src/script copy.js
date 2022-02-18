@@ -3,9 +3,6 @@ import * as THREE from "three"
 import * as dat from "lil-gui"
 import { Group } from "three"
 import gsap from "gsap"
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader"
-import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry"
 
 /**
  * Debug
@@ -105,7 +102,7 @@ const particleSpan = 15
 for (let i = 0; i < particlesCount; i++) {
   positions[i * 3 + 0] = (Math.random() - 0.5) * particleSpan
   positions[i * 3 + 1] =
-    objectDistance * 0.5 - Math.random() * objectDistance * 3za 
+    objectDistance * 0.5 - Math.random() * objectDistance * meshes.length
   positions[i * 3 + 2] = (Math.random() - 0.5) * particleSpan
 }
 
@@ -159,57 +156,6 @@ window.addEventListener("resize", () => {
 })
 
 /**
- * Fonts
- */
-
-const fontLoader = new FontLoader()
-
-fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
-  const bevelSize = 0.02
-  const bevelThickness = 0.03
-  const textGeometry = new TextGeometry("Seunggun Lee", {
-    font: font,
-    size: 0.5,
-    height: 0.3,
-    curveSegments: 6,
-    bevelEnabled: true, // The 3-dness of text
-    bevelSize: bevelSize,
-    bevelThickness: bevelThickness,
-    bevelSegments: 2,
-  })
-
-  const textMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture })
-
-  const text = new THREE.Mesh(textGeometry, textMaterial)
-  scene.add(text)
-
-  /**
-   * Center Text with Bounding Box
-   */
-  // 1. Compute bounding box & 2. Get it
-  textGeometry.computeBoundingBox()
-
-  // 3. Center Geometery
-  const maxX = textGeometry.boundingBox.max.x
-  const maxY = textGeometry.boundingBox.max.y
-  const maxZ = textGeometry.boundingBox.max.z
-
-  textGeometry.translate(
-    -(maxX - bevelSize) * 0.5,
-    -(maxY - bevelSize) * 0.5,
-    -(maxZ - bevelThickness) * 0.5
-  )
-
-  // Or.. just use center() :/
-  textGeometry.center()
-
-  console.log(textGeometry.boundingBox) // Shows max and  min coordinates xyz
-  //   const minX = textGeometry.boundingBox.min.x
-  //   const minY = textGeometry.boundingBox.min.y
-  //   const minZ = textGeometry.boundingBox.min.z
-})
-
-/**
  * Camera
  */
 // Base camera
@@ -225,9 +171,6 @@ camera.position.z = 6
 const cameraGroup = new THREE.Group()
 cameraGroup.add(camera)
 scene.add(cameraGroup)
-
-// Controls
-const controls = new OrbitControls(camera, canvas)
 
 /**
  * Renderer
@@ -272,9 +215,6 @@ const tick = () => {
   const deltaTime = elapsedTime - previousTime
   previousTime = elapsedTime
 
-  // Update controls
-  controls.update()
-
   // Render
   renderer.render(scene, camera)
 
@@ -288,10 +228,10 @@ const tick = () => {
   const parallaxX = cursor.x
   const parallaxY = -cursor.y
   const easeValue = 1
-  // cameraGroup.position.x +=
-  //   (parallaxX - cameraGroup.position.x) * easeValue * deltaTime // Easing / lerping formula (dest - current) * 10
-  // cameraGroup.position.y +=
-  //   (parallaxY - cameraGroup.position.y) * easeValue * deltaTime
+  cameraGroup.position.x +=
+    (parallaxX - cameraGroup.position.x) * easeValue * deltaTime // Easing / lerping formula (dest - current) * 10
+  cameraGroup.position.y +=
+    (parallaxY - cameraGroup.position.y) * easeValue * deltaTime
   // Rotate meshes
   for (const mesh of meshes) {
     mesh.rotation.x += deltaTime * 0.1
